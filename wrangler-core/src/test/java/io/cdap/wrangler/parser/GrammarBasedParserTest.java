@@ -21,6 +21,7 @@ import io.cdap.wrangler.api.CompileStatus;
 import io.cdap.wrangler.api.Compiler;
 import io.cdap.wrangler.api.Directive;
 import io.cdap.wrangler.api.RecipeParser;
+import io.cdap.wrangler.api.RecipeSymbol;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -39,12 +40,13 @@ public class GrammarBasedParserTest {
       "parse-as-csv :body ',' true;",
       "#pragma load-directives text-reverse, text-exchange;",
       "${macro} ${macro_2}",
-      "${macro_${test}}"
+      "${macro_${test}}",
+      "aggregate-stats :size :duration 'total_bytes' 'total_time';"
     };
 
     RecipeParser parser = TestingRig.parse(recipe);
     List<Directive> directives = parser.parse();
-    Assert.assertEquals(2, directives.size());
+    Assert.assertEquals(3, directives.size()); 
   }
 
   @Test
@@ -75,4 +77,26 @@ public class GrammarBasedParserTest {
     Assert.assertEquals(0, directives.size());
   }
 
+  @Test
+  public void testValidByteSizeAndTimeDurationParsing() throws Exception {
+    String[] recipe = {
+      "aggregate-stats :size :duration 'total_size_mb' 'total_time_sec';"
+    };
+
+    RecipeSymbol parsed = TestingRig.parse(recipe).compile();
+    Assert.assertNotNull(parsed);
+    Assert.assertTrue(parsed.toString().contains("aggregate-stats"));
+    Assert.assertTrue(parsed.toString().contains("total_size_mb"));
+    Assert.assertTrue(parsed.toString().contains("total_time_sec"));
+  }
+
+  // ✅ NEW TEST: Invalid syntax should fail
+  @Test(expected = Exception.class)
+  public void testInvalidByteSizeFails() throws Exception {
+    String[] recipe = {
+      "aggregate-stats :size 123XY 'bad_bytes' 'bad_time';"
+    };
+
+    TestingRig.parse(recipe).compile();
+  }
 }

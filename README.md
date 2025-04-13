@@ -216,3 +216,33 @@ Cask is a trademark of Cask Data, Inc. All rights reserved.
 
 Apache, Apache HBase, and HBase are trademarks of The Apache Software Foundation. Used with
 permission. No endorsement by The Apache Software Foundation is implied by the use of these marks.
+
+# Wrangler Enhancement: Byte Size and Time Duration Units
+
+## ✨ Overview
+This enhancement adds native support in the Wrangler core library to handle and parse **byte size** and **time duration** units (e.g., `10KB`, `1.5MB`, `500ms`, `2s`) directly in Wrangler recipes. These additions simplify complex recipes and enable seamless aggregation of size and time-based data.
+
+---
+
+## 🧠 Key Features
+
+### 🔹 1. Byte Size Token Support
+- **Example inputs**: `10KB`, `1.5MB`, `2048B`
+- **Canonical unit**: Bytes
+- **Class**: `ByteSize.java`
+- **Method**: `getBytes()` returns the value in bytes.
+
+### 🔹 2. Time Duration Token Support
+- **Example inputs**: `500ms`, `2s`, `1.5m`
+- **Canonical unit**: Nanoseconds or milliseconds
+- **Class**: `TimeDuration.java`
+- **Method**: `getMilliseconds()` returns the value in milliseconds.
+
+---
+
+## 🛠 New Directive: `aggregate-stats`
+This directive demonstrates the usage of the new tokens by aggregating values from byte size and time duration columns.
+
+### Usage:
+```wrangler
+aggregate-stats :data_transfer_size :response_time total_size_mb total_time_sec
