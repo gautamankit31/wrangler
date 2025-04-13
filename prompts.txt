@@ -1,0 +1,53 @@
+Hi, I need help enhancing the CDAP Wrangler core library.
+
+I want to add support for parsing **byte size units** (like "10KB", "1.5MB") and **time duration units** (like "500ms", "2s") in Wrangler recipes.
+
+Here’s the full breakdown:
+
+---
+
+🟡 Modify the grammar (Directives.g4)
+- Add new tokens for BYTE_SIZE and TIME_DURATION.
+- Add helper fragments like BYTE_UNIT and TIME_UNIT.
+- Update or create new parser rules such as `byteSizeArg` and `timeDurationArg`.
+- Regenerate the ANTLR code using `mvn compile`.
+
+---
+
+🟢 Add new token classes in wrangler-api
+- Create `ByteSize.java` and `TimeDuration.java` classes.
+- They should extend `Token` and parse values like "10KB" or "500ms" in their constructor.
+- Add helper methods: `getBytes()`, `getMilliseconds()`, etc.
+- Register BYTE_SIZE and TIME_DURATION in the token type system.
+
+---
+
+🔵 Update the core parser
+- Add visitor methods for the new rules like `visitByteSizeArg` and `visitTimeDurationArg`.
+- Add parsed tokens into the token group.
+
+---
+
+🟣 Implement a new directive called `aggregate-stats`
+- Arguments:
+  1. Source column for size (e.g., `:data_transfer_size`)
+  2. Source column for time (e.g., `:response_time`)
+  3. Target column for aggregated size (e.g., `total_size_mb`)
+  4. Target column for aggregated time (e.g., `total_time_sec`)
+- Add optional args for output unit (MB, GB, seconds) and aggregation type (total, average).
+- Implement logic to sum/average values in canonical units.
+- Output a new single row with results.
+
+---
+
+🧪 Write tests
+- Add unit tests for ByteSize and TimeDuration.
+- Add recipe parsing tests to validate new syntax.
+- Add directive tests to verify correct aggregations.
+
+---
+
+📌 Output must:
+- Build successfully
+- Pass all tests
+- Follow the same code structure and patterns as existing Wrangler code
